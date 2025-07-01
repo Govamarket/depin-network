@@ -1,26 +1,78 @@
 import React, { useState, useEffect } from "react";
-import Header from "./Header";
-import StatsCard from "./StatsCard";
-import ProjectCard from "./ProjectCard";
-import QuickActions from "./QuickActions";
 import {
+  Power,
   Plus,
-  DollarSign,
-  CheckCircle,
-  Wifi,
-  BarChart3,
-  Radio,
-  MapPin,
-  Thermometer,
-  Car,
-  Zap,
+  Wallet,
+  Settings,
+  TrendingUp,
+  Activity,
   Globe,
-  XCircle,
+  Zap,
+  DollarSign,
+  RefreshCcw,
+  Bell,
+  ChevronRight,
+  Wifi,
+  WifiOff,
+  BarChart3,
+  Shield,
+  Gamepad2,
+  Navigation,
+  Thermometer,
+  Radio,
+  Car,
+  MapPin,
+  Clock,
+  CheckCircle,
   AlertCircle,
+  XCircle,
 } from "lucide-react";
-// Icons from lucide-react
 
 const DePINDashboard = () => {
+  const [showAddProject, setShowAddProject] = useState(false);
+  const [availableProjects] = useState([
+    {
+      name: "Grass",
+      type: "Bandwidth Sharing",
+      method: "chrome_extension",
+      description: "Share unused internet bandwidth",
+      icon: Globe,
+      setupInstructions: "Install Chrome extension and login",
+      controlType: "manual",
+      apiAvailable: false,
+    },
+    {
+      name: "Nodepay",
+      type: "Network Sharing",
+      method: "chrome_extension",
+      description: "Passive income through network sharing",
+      icon: Wifi,
+      setupInstructions: "Install extension, verify email, run in background",
+      controlType: "manual",
+      apiAvailable: false,
+    },
+    {
+      name: "Flux",
+      type: "Cloud Computing",
+      method: "desktop_app",
+      description: "Decentralized cloud infrastructure",
+      icon: Zap,
+      setupInstructions: "Download FluxNode, configure, stake FLUX",
+      controlType: "api",
+      apiAvailable: true,
+    },
+    {
+      name: "Theta Edge Node",
+      type: "Video Streaming",
+      method: "desktop_app",
+      description: "Share bandwidth for video delivery",
+      icon: Activity,
+      setupInstructions: "Install Edge Node, set sharing preferences",
+      controlType: "manual",
+      apiAvailable: false,
+    },
+  ]);
+
   const [projects, setProjects] = useState([
     {
       id: "helium",
@@ -160,72 +212,444 @@ const DePINDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <Header
-        connectedWallet={connectedWallet}
-        isRefreshing={isRefreshing}
-        refreshData={refreshData}
-      />
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                    DePIN Control Center
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    Decentralized Infrastructure Management
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={refreshData}
+                className="p-2 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-200 border border-white/30"
+              >
+                <RefreshCcw
+                  className={`w-5 h-5 text-gray-600 ${
+                    isRefreshing ? "animate-spin" : ""
+                  }`}
+                />
+              </button>
+              <div className="flex items-center space-x-2 bg-white/50 px-4 py-2 rounded-lg border border-white/30">
+                <Wallet className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  {connectedWallet}
+                </span>
+              </div>
+              <button className="p-2 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-200 border border-white/30">
+                <Settings className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            title="Total Earnings (24h)"
-            value={`$${totalEarnings.toFixed(2)}`}
-            icon={DollarSign}
-            gradient="from-green-500 to-emerald-500"
-            subtext="vs yesterday"
-            trend="+12.5%"
-          />
-          <StatsCard
-            title="Active Projects"
-            value={projects.filter((p) => p.status === "active").length}
-            icon={CheckCircle}
-            gradient="from-blue-500 to-cyan-500"
-            subtext={`of ${projects.length} total projects`}
-          />
-          <StatsCard
-            title="Avg Performance"
-            value={`${Math.round(
-              projects.reduce((sum, p) => sum + p.performance, 0) /
-                projects.length
-            )}%`}
-            icon={BarChart3}
-            gradient="from-purple-500 to-pink-500"
-            subtext="Optimal"
-          />
-          <StatsCard
-            title="Network Status"
-            value="Online"
-            icon={Wifi}
-            gradient="from-green-500 to-emerald-500"
-            subtext="All systems operational"
-          />
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Earnings (24h)
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  ${totalEarnings.toFixed(2)}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center">
+              <TrendingUp className="w-4 h-4 text-green-500 mr-2" />
+              <span className="text-sm text-green-600 font-medium">+12.5%</span>
+              <span className="text-sm text-gray-500 ml-2">vs yesterday</span>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Active Projects
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {projects.filter((p) => p.status === "active").length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center">
+              <span className="text-sm text-gray-500">
+                of {projects.length} total projects
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Avg Performance
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {Math.round(
+                    projects.reduce((sum, p) => sum + p.performance, 0) /
+                      projects.length
+                  )}
+                  %
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center">
+              <Activity className="w-4 h-4 text-purple-500 mr-2" />
+              <span className="text-sm text-purple-600 font-medium">
+                Optimal
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Network Status
+                </p>
+                <p className="text-3xl font-bold text-green-600">Online</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <Wifi className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              <span className="text-sm text-gray-500">
+                All systems operational
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Projects Grid */}
+        {/* Add Project Modal Trigger */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             Your DePIN Projects
           </h2>
-          <button className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <button
+            onClick={() => setShowAddProject(true)}
+            className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
             <Plus className="w-4 h-4" />
             <span>Add Project</span>
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              toggleProject={toggleProject}
-              getStatusIcon={getStatusIcon}
-              getStatusColor={getStatusColor}
-            />
-          ))}
+          {projects.map((project) => {
+            const IconComponent = project.icon;
+            return (
+              <div
+                key={project.id}
+                className={`${project.bgColor} backdrop-blur-sm rounded-2xl p-6 border ${project.borderColor} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+              >
+                {/* Project Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className={`w-12 h-12 bg-gradient-to-r ${project.color} rounded-xl flex items-center justify-center shadow-lg`}
+                    >
+                      <IconComponent className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{project.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(project.status)}
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${getStatusColor(
+                        project.status
+                      )}`}
+                    >
+                      {project.status}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Earnings */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">24h Earnings</span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-gray-900">
+                        {project.earnings.amount} {project.earnings.token}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        ${project.earnings.usd}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Performance Bar */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Performance</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {project.performance}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`bg-gradient-to-r ${project.color} h-2 rounded-full transition-all duration-500`}
+                      style={{ width: `${project.performance}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Last Sync */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <Clock className="w-4 h-4" />
+                    <span>Last sync: {project.lastSync}</span>
+                  </div>
+                </div>
+
+                {/* Toggle Switch */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <span className="text-sm font-medium text-gray-700">
+                    {project.status === "active" ? "Deactivate" : "Activate"}
+                  </span>
+                  <button
+                    onClick={() => toggleProject(project.id)}
+                    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      project.status === "active"
+                        ? "bg-blue-600"
+                        : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${
+                        project.status === "active"
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-2 mt-4">
+                  <button className="flex-1 bg-white/80 hover:bg-white text-gray-700 text-sm py-2 px-3 rounded-lg transition-all duration-200 border border-gray-200 hover:border-gray-300">
+                    Settings
+                  </button>
+                  <button className="flex-1 bg-white/80 hover:bg-white text-gray-700 text-sm py-2 px-3 rounded-lg transition-all duration-200 border border-gray-200 hover:border-gray-300">
+                    View Stats
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <QuickActions />
+        {/* Add Project Modal */}
+        {showAddProject && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Add DePIN Project
+                </h3>
+                <button
+                  onClick={() => setShowAddProject(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <XCircle className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {availableProjects.map((project, index) => {
+                  const IconComponent = project.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all"
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-900 mb-1">
+                            {project.name}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {project.description}
+                          </p>
+
+                          {/* Method Badge */}
+                          <div className="flex items-center space-x-2 mb-3">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                project.method === "chrome_extension"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : project.method === "desktop_app"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {project.method.replace("_", " ").toUpperCase()}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                project.apiAvailable
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {project.apiAvailable
+                                ? "API Available"
+                                : "Manual Control"}
+                            </span>
+                          </div>
+
+                          {/* Setup Instructions */}
+                          <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                            <p className="text-xs text-gray-600 font-medium mb-1">
+                              Setup Instructions:
+                            </p>
+                            <p className="text-xs text-gray-700">
+                              {project.setupInstructions}
+                            </p>
+                          </div>
+
+                          {/* Control Method Explanation */}
+                          <div className="mb-4">
+                            {project.method === "chrome_extension" && (
+                              <div className="flex items-start space-x-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg">
+                                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="font-medium">
+                                    Chrome Extension Project
+                                  </p>
+                                  <p>
+                                    This runs in your browser. Dashboard will
+                                    track manually entered earnings and provide
+                                    quick links to extension.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            {project.method === "desktop_app" &&
+                              !project.apiAvailable && (
+                                <div className="flex items-start space-x-2 text-xs text-blue-700 bg-blue-50 p-2 rounded-lg">
+                                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <p className="font-medium">
+                                      Desktop Application
+                                    </p>
+                                    <p>
+                                      Runs on your computer. Dashboard will
+                                      provide shortcuts and manual earnings
+                                      tracking.
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            {project.apiAvailable && (
+                              <div className="flex items-start space-x-2 text-xs text-green-700 bg-green-50 p-2 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="font-medium">
+                                    API Integration Available
+                                  </p>
+                                  <p>
+                                    Dashboard can automatically control and
+                                    monitor this project.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all">
+                            Add Project
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Custom Project Option */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border-2 border-dashed border-gray-300">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Plus className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 mb-2">
+                    Custom Project
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add a project not listed above
+                  </p>
+                  <button className="bg-gray-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-gray-700 transition-all">
+                    Add Custom Project
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="mt-12 bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button className="flex items-center space-x-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <Power className="w-5 h-5" />
+              <span className="font-medium">Start All</span>
+            </button>
+            <button className="flex items-center space-x-3 bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <Power className="w-5 h-5" />
+              <span className="font-medium">Stop All</span>
+            </button>
+            <button className="flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-4 rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <RefreshCcw className="w-5 h-5" />
+              <span className="font-medium">Sync All</span>
+            </button>
+            <button className="flex items-center space-x-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <BarChart3 className="w-5 h-5" />
+              <span className="font-medium">View Report</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
