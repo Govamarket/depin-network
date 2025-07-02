@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DePINFooter from "./DePINFooter";
 import Header from "./Header";
 import {
   Power,
@@ -616,6 +617,9 @@ const DePINDashboard = () => {
             </button>
           </div>
         </div>
+      </div>
+      <div>
+        <DePINFooter />
       </div>
     </div>
   );
