@@ -66,7 +66,7 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
-      <BackgroundEffects />
+      {/* <BackgroundEffects /> */}
 
       <div className="w-full max-w-md mx-auto">
         <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl">

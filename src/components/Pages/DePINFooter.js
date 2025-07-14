@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Twitter,
   Github,
@@ -182,6 +183,7 @@ const DePINFooter = () => {
     </div>
   );
 
+  // Privacy Modal Component
   const PrivacyModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto">
@@ -305,6 +307,9 @@ const DePINFooter = () => {
       </div>
     </div>
   );
+
+  // Render the footer component
+  // This component includes the main footer content, links, social media icons, and modals
 
   return (
     <>
