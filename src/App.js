@@ -62,7 +62,14 @@ function App() {
       <Routes>
         <Route element={<PublicRoute isAuthenticated={isAuthenticated} />}>
           <Route path="/login" element={<SignInPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/register"
+            element={
+              <RegisterPage
+                onNavigateToSignIn={() => (window.location.href = "/login")}
+              />
+            }
+          />
         </Route>
 
         <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
@@ -70,10 +77,14 @@ function App() {
           <Route path="/help" element={<HelpCenter />} />
         </Route>
 
+        {/* Updated root route to redirect to register page first */}
         <Route
           path="/"
           element={
-            <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+            <Navigate
+              to={isAuthenticated ? "/dashboard" : "/register"}
+              replace
+            />
           }
         />
       </Routes>

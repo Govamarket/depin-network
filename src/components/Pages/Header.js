@@ -1,8 +1,21 @@
 import React, { useState } from "react";
-import { Activity, Menu, X, Wallet, Settings, RefreshCcw } from "lucide-react";
+import { Activity, Menu, X, Settings, RefreshCcw, LogOut } from "lucide-react";
+import { doSignOut } from "../../Firebase/auth";
+import { useNavigate } from "react-router-dom";
 
-const Header = ({ connectedWallet, isRefreshing, refreshData }) => {
+const Header = ({ isRefreshing, refreshData }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await doSignOut();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header className="bg-white/80 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50 w-full">
@@ -36,15 +49,27 @@ const Header = ({ connectedWallet, isRefreshing, refreshData }) => {
                 }`}
               />
             </button>
-            <div className="flex items-center space-x-2 bg-white/50 px-4 py-2 rounded-lg border border-white/30">
-              <Wallet className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700 truncate max-w-[120px]">
-                {connectedWallet}
-              </span>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                className="p-2 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-200 border border-white/30"
+              >
+                <Settings className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {showSettingsDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
-            <button className="p-2 rounded-lg bg-white/50 hover:bg-white/80 transition-all duration-200 border border-white/30">
-              <Settings className="w-5 h-5 text-gray-600" />
-            </button>
           </div>
 
           {/* Mobile Navigation - Toggle Button */}
@@ -79,22 +104,25 @@ const Header = ({ connectedWallet, isRefreshing, refreshData }) => {
           } mt-4 pb-4 border-t border-white/20 pt-4`}
         >
           <div className="flex flex-col space-y-3">
-            <div className="flex items-center space-x-2 bg-white/50 px-4 py-3 rounded-lg border border-white/30">
-              <Wallet className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700 truncate">
-                {connectedWallet}
-              </span>
-            </div>
-            <button className="flex items-center space-x-2 text-left px-4 py-2 text-gray-700 hover:bg-white/50 rounded-lg">
+            <button
+              onClick={() => {
+                setShowSettingsDropdown(!showSettingsDropdown);
+              }}
+              className="flex items-center space-x-2 text-left px-4 py-2 text-gray-700 hover:bg-white/50 rounded-lg"
+            >
               <Settings className="w-5 h-5 text-gray-600" />
               <span>Settings</span>
             </button>
-            <button className="text-left px-4 py-2 text-gray-700 hover:bg-white/50 rounded-lg">
-              Dashboard
-            </button>
-            <button className="text-left px-4 py-2 text-gray-700 hover:bg-white/50 rounded-lg">
-              Analytics
-            </button>
+
+            {showSettingsDropdown && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 text-left px-4 py-2 text-gray-700 hover:bg-white/50 rounded-lg ml-4"
+              >
+                <LogOut className="w-4 h-4 text-gray-600" />
+                <span>Logout</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
