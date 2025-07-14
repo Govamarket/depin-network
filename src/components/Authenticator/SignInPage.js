@@ -1,30 +1,12 @@
-// Shared Background Component
 import React, { useState } from "react";
+import { Wallet, Mail, Lock, Chrome, Eye, EyeOff, Network } from "lucide-react";
 import {
-  Wallet,
-  Mail,
-  Lock,
-  User,
-  Chrome,
-  Eye,
-  EyeOff,
-  Shield,
-  Zap,
-  Network,
-  ArrowLeft,
-} from "lucide-react";
-const BackgroundEffects = () => (
-  <div className="fixed inset-0 -z-10 overflow-hidden">
-    <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
-    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-    <div
-      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 rounded-full blur-3xl animate-spin"
-      style={{ animationDuration: "20s" }}
-    ></div>
-  </div>
-);
+  doSignInWithEmailAndPassword,
+  doSignInWithGoogle,
+} from "../../Firebase/auth";
+import BackgroundEffects from "../Shared/BackgroundEffects";
+import { useNavigate } from "react-router-dom";
 
-// Sign-In Page Component
 const SignInPage = ({ onNavigateToRegister }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -32,7 +14,9 @@ const SignInPage = ({ onNavigateToRegister }) => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [connectedWallet, setConnectedWallet] = useState(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,27 +28,47 @@ const SignInPage = ({ onNavigateToRegister }) => {
 
   const handleGoogleAuth = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    setError(null);
+    try {
+      await doSignInWithGoogle();
+      // No need for alert - the auth state listener will handle the redirect
+    } catch (error) {
+      setError(error.message || "Failed to sign in with Google");
+      console.error("Google Auth Error:", error);
+    } finally {
       setIsLoading(false);
-      alert("Google authentication would be handled here");
-    }, 2000);
+    }
   };
 
   const handleWalletConnect = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setConnectedWallet("0x742d...8c4a");
+    setError(null);
+    try {
+      // Simulate wallet connection
+      setTimeout(() => {
+        setConnectedWallet("0x742d...8c4a");
+        setIsLoading(false);
+      }, 2000);
+    } catch (error) {
+      setError("Failed to connect wallet");
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      await doSignInWithEmailAndPassword(formData.email, formData.password);
+      // No need for alert - the auth state listener will handle the redirect
+    } catch (error) {
+      setError(error.message || "Failed to sign in");
+      console.error("Sign in Error:", error);
+    } finally {
       setIsLoading(false);
-      alert("Sign in successful! Redirecting to dashboard...");
-    }, 2000);
+    }
   };
 
   return (
@@ -87,8 +91,14 @@ const SignInPage = ({ onNavigateToRegister }) => {
             </p>
           </div>
 
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 text-red-300 rounded-xl p-3 text-sm mb-4">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-6">
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -143,23 +153,22 @@ const SignInPage = ({ onNavigateToRegister }) => {
                   Forgot password?
                 </button>
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:from-cyan-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Signing In...
-                </div>
-              ) : (
-                "Sign In"
-              )}
-            </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:from-cyan-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    Signing In...
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </form>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

@@ -4,7 +4,6 @@ import Header from "./Header";
 import {
   Power,
   Plus,
-  Wallet,
   Settings,
   TrendingUp,
   Activity,
@@ -157,7 +156,6 @@ const DePINDashboard = () => {
   ]);
 
   const [totalEarnings, setTotalEarnings] = useState(0);
-  const [connectedWallet, setConnectedWallet] = useState("0x1234...5678");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -217,11 +215,7 @@ const DePINDashboard = () => {
       {/* Header */}
       <div className="fixed w-full z-50 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Use the Header component */}
-        <Header
-          connectedWallet={connectedWallet}
-          isRefreshing={isRefreshing}
-          refreshData={refreshData}
-        />
+        <Header isRefreshing={isRefreshing} refreshData={refreshData} />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-24">

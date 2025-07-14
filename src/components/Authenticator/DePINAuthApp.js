@@ -1,13 +1,18 @@
-// Main App Component with Navigation
+// src/components/DePINAuthApp.js
+import React, { useState } from "react";
+import SignInPage from "./Authenticator/SignInPage";
+import RegisterPage from "./Authenticator/RegisterPage";
+
 const DePINAuthApp = () => {
-  const [currentPage, setCurrentPage] = useState("signin");
+  // Changed default to "register" so register page shows first
+  const [currentPage, setCurrentPage] = useState("register");
 
   return (
     <div>
-      {currentPage === "signin" ? (
-        <SignInPage onNavigateToRegister={() => setCurrentPage("register")} />
-      ) : (
+      {currentPage === "register" ? (
         <RegisterPage onNavigateToSignIn={() => setCurrentPage("signin")} />
+      ) : (
+        <SignInPage onNavigateToRegister={() => setCurrentPage("register")} />
       )}
     </div>
   );

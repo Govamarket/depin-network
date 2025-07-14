@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Wallet,
   Mail,
   Lock,
   User,
@@ -9,11 +8,13 @@ import {
   EyeOff,
   Shield,
   Zap,
-  Network,
-  ArrowLeft,
 } from "lucide-react";
+import {
+  doCreateUserWithEmailAndPassword,
+  doSignInWithGoogle,
+} from "../../Firebase/auth";
+import BackgroundEffects from "../Shared/BackgroundEffects";
 
-// Register Page Component
 const RegisterPage = ({ onNavigateToSignIn }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
     acceptTerms: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -37,36 +38,61 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
 
   const handleGoogleAuth = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    setError(null);
+    try {
+      await doSignInWithGoogle();
+      // No alert needed - auth state listener handles redirect
+    } catch (error) {
+      setError(error.message || "Failed to authenticate with Google");
+      console.error("Google Auth Error:", error);
+    } finally {
       setIsLoading(false);
-      alert("Google registration would be handled here");
-    }, 2000);
-  };
-
-  const handleWalletConnect = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setConnectedWallet("0x742d...8c4a");
-      setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+    setError(null);
+
+    // Validation checks
+    if (!formData.acceptTerms) {
+      setError("You must accept the terms and conditions");
       return;
     }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await doCreateUserWithEmailAndPassword(formData.email, formData.password);
+      // No alert needed - auth state listener handles redirect
+    } catch (error) {
+      let errorMessage = "Registration failed";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "Email is already in use";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password should be at least 6 characters";
+      }
+      setError(errorMessage);
+      console.error("Registration Error:", error);
+    } finally {
       setIsLoading(false);
-      alert("Registration successful! Welcome to DePIN Control Center");
-    }, 2000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
-      {/* <BackgroundEffects /> */}
+      <BackgroundEffects />
 
       <div className="w-full max-w-md mx-auto">
         <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl">
@@ -84,7 +110,13 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
             </p>
           </div>
 
-          <div className="space-y-6">
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 text-red-300 rounded-xl p-3 text-sm mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -135,6 +167,7 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
                 onChange={handleInputChange}
                 className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-300"
                 required
+                minLength={6}
               />
               <button
                 type="button"
@@ -152,47 +185,15 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="confirmPassword"
                 placeholder="Confirm password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-300"
                 required
+                minLength={6}
               />
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900/50 text-gray-400">
-                  Quick registration
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={handleGoogleAuth}
-                disabled={isLoading}
-                className="flex items-center justify-center px-4 py-3 bg-white/10 border border-gray-700 rounded-xl text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-gray-500/50 disabled:opacity-50 transition-all duration-300 group"
-              >
-                <Chrome className="w-5 h-5 mr-2 group-hover:text-blue-400 transition-colors" />
-                Google
-              </button>
-
-              <button
-                type="button"
-                onClick={handleWalletConnect}
-                disabled={isLoading}
-                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl text-amber-200 hover:from-amber-500/30 hover:to-orange-500/30 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 transition-all duration-300 group"
-              >
-                <Wallet className="w-5 h-5 mr-2 group-hover:text-amber-400 transition-colors" />
-                {connectedWallet ? connectedWallet : "Connect"}
-              </button>
             </div>
 
             <div className="flex items-start space-x-3">
@@ -208,14 +209,14 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
                 I agree to the{" "}
                 <button
                   type="button"
-                  className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                  className="text-emerald-400 hover:text-emerald-300 cursor-pointer"
                 >
                   Terms of Service
                 </button>{" "}
                 and{" "}
                 <button
                   type="button"
-                  className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                  className="text-emerald-400 hover:text-emerald-300 cursor-pointer"
                 >
                   Privacy Policy
                 </button>
@@ -223,8 +224,7 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
             </div>
 
             <button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               disabled={isLoading || !formData.acceptTerms}
               className="w-full py-3 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
             >
@@ -241,6 +241,27 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
               )}
             </button>
 
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gray-900/50 text-gray-400">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center px-4 py-3 bg-white/10 border border-gray-700 rounded-xl text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-gray-500/50 disabled:opacity-50 transition-all duration-300 group"
+            >
+              <Chrome className="w-5 h-5 mr-2 group-hover:text-blue-400 transition-colors" />
+              Continue with Google
+            </button>
+
             <div className="text-center">
               <p className="text-gray-400">
                 Already have an account?{" "}
@@ -253,10 +274,11 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
                 </button>
               </p>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   );
 };
+
 export default RegisterPage;

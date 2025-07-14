@@ -1,3 +1,4 @@
+// src/App.js
 import "./App.css";
 import { useState, useEffect } from "react";
 import {
@@ -11,92 +12,68 @@ import DePINDashboard from "./components/Pages/DePINDashboard";
 import HelpCenter from "./components/Support/HelpCenter";
 import RegisterPage from "./components/Authenticator/RegisterPage";
 import SignInPage from "./components/Authenticator/SignInPage";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./Firebase/Config";
 
-// Protected Route Component
 function ProtectedRoute({ isAuthenticated }) {
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // This is where Outlet renders the child routes
-  return (
-    <div className="App">
-      <DePINDashboard />
-      <Outlet /> {/* Child routes render here */}
-    </div>
-  );
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
-// Public Route Component (for auth pages)
 function PublicRoute({ isAuthenticated }) {
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <Outlet />;
-  {
-    /* Auth pages render here */
-  }
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
 }
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check authentication status on app load
   useEffect(() => {
-    // Check if user is already logged in (e.g., from localStorage, token, etc.)
-    const checkAuth = () => {
-      const token = localStorage.getItem("authToken");
-      setIsAuthenticated(!!token);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const token = await user.getIdToken();
+          localStorage.setItem("authToken", token);
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error("Error getting user token:", error);
+          localStorage.removeItem("authToken");
+          setIsAuthenticated(false);
+        }
+      } else {
+        localStorage.removeItem("authToken");
+        setIsAuthenticated(false);
+      }
       setIsLoading(false);
-    };
+    });
 
-    checkAuth();
+    return () => unsubscribe();
   }, []);
 
-  const handleLogin = (token) => {
-    localStorage.setItem("authToken", token);
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    setIsAuthenticated(false);
-  };
-
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
   }
 
   return (
     <Router>
       <Routes>
-        {/* Public Routes - Only show when NOT authenticated */}
         <Route element={<PublicRoute isAuthenticated={isAuthenticated} />}>
-          <Route path="/login" element={<SignInPage onLogin={handleLogin} />} />
-          <Route
-            path="/register"
-            element={<RegisterPage onRegister={handleLogin} />}
-          />
+          <Route path="/login" element={<SignInPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Route>
 
-        {/* Protected Routes - Only show when authenticated */}
         <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
-          <Route path="/dashboard" element={<div>Dashboard Content</div>} />
+          <Route path="/dashboard" element={<DePINDashboard />} />
           <Route path="/help" element={<HelpCenter />} />
-          {/* Add more protected routes here */}
         </Route>
 
-        {/* Default redirect */}
         <Route
           path="/"
           element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
           }
         />
       </Routes>
