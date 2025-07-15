@@ -7,7 +7,7 @@ import {
   Eye,
   EyeOff,
   Shield,
-  Zap,
+  Network,
 } from "lucide-react";
 import {
   doCreateUserWithEmailAndPassword,
@@ -108,7 +108,7 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="p-3 bg-gradient-to-br from-emerald-500 to-cyan-600 rounded-2xl">
-                <Zap className="w-8 h-8 text-white" />
+                <Network className="w-8 h-8 text-white" />
               </div>
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
