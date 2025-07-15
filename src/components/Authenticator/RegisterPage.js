@@ -14,6 +14,7 @@ import {
   doSignInWithGoogle,
 } from "../../Firebase/auth";
 import BackgroundEffects from "../Shared/BackgroundEffects";
+import { getAuth, signOut } from "firebase/auth"; // <-- Import for signOut
 
 const RegisterPage = ({ onNavigateToSignIn }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +74,15 @@ const RegisterPage = ({ onNavigateToSignIn }) => {
     setIsLoading(true);
     try {
       await doCreateUserWithEmailAndPassword(formData.email, formData.password);
-      // No alert needed - auth state listener handles redirect
+
+      // Sign out the user after registration
+      const auth = getAuth();
+      await signOut(auth);
+
+      // Now navigate to the sign-in page
+      if (typeof onNavigateToSignIn === "function") {
+        onNavigateToSignIn();
+      }
     } catch (error) {
       let errorMessage = "Registration failed";
       if (error.code === "auth/email-already-in-use") {

@@ -29,7 +29,26 @@ import {
   XCircle,
 } from "lucide-react";
 
-const DePINDashboard = () => {
+// --- Firebase imports ---
+// import { db } from "./firebase"; // your firebase config
+// import { collection, doc, setDoc, getDocs } from "firebase/firestore";
+
+// Helper for adding a validator (dummy, replace with actual Firebase logic)
+async function addValidatorToUser(uid, validator) {
+  // await setDoc(doc(collection(db, "users", uid, "validators"), validator.validatorId), validator, { merge: true });
+  // For demo, just a timeout
+  return new Promise((res) => setTimeout(res, 600));
+}
+
+// Dummy Chrome extension detection (replace with your actual detection logic)
+function isExtensionInstalled() {
+  return new Promise((resolve) => {
+    // Simulated async check (replace with chrome.runtime messaging)
+    setTimeout(() => resolve(true), 500);
+  });
+}
+
+const DePINDashboard = ({ user }) => {
   const [showAddProject, setShowAddProject] = useState(false);
   const [availableProjects] = useState([
     {
@@ -74,6 +93,7 @@ const DePINDashboard = () => {
     },
   ]);
 
+  // Dashboard state for user's active projects
   const [projects, setProjects] = useState([
     {
       id: "helium",
@@ -158,6 +178,11 @@ const DePINDashboard = () => {
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Add Project Modal State
+  const [addStatus, setAddStatus] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [uploadDesktopApp, setUploadDesktopApp] = useState(null);
+
   useEffect(() => {
     const total = projects.reduce(
       (sum, project) => sum + project.earnings.usd,
@@ -210,17 +235,78 @@ const DePINDashboard = () => {
     }
   };
 
+  // --- Add Project Logic ---
+  async function handleProjectAdd(project) {
+    setAddStatus("");
+    setSelectedProject(project);
+
+    if (project.method === "chrome_extension") {
+      setAddStatus("Checking for extension...");
+      const installed = await isExtensionInstalled();
+      if (!installed) {
+        setAddStatus("Extension not detected. Please install it first.");
+        return;
+      }
+      // Add to dashboard (simulate, replace with actual Firebase call)
+      setProjects((prev) => [
+        ...prev,
+        {
+          id: project.name.toLowerCase(),
+          name: project.name,
+          type: project.type,
+          icon: project.icon,
+          status: "active",
+          earnings: { amount: 0, token: "", usd: 0 },
+          performance: 100,
+          lastSync: "just now",
+          color: "from-blue-500 to-purple-500",
+          bgColor: "bg-blue-50",
+          borderColor: "border-blue-200",
+        },
+      ]);
+      setAddStatus("Extension connected and project added!");
+    } else if (project.method === "desktop_app") {
+      if (!uploadDesktopApp) {
+        setAddStatus("Please upload or select your desktop app/config first.");
+        return;
+      }
+      setProjects((prev) => [
+        ...prev,
+        {
+          id: project.name.toLowerCase(),
+          name: project.name,
+          type: project.type,
+          icon: project.icon,
+          status: "inactive",
+          earnings: { amount: 0, token: "", usd: 0 },
+          performance: 0,
+          lastSync: "never",
+          color: "from-blue-500 to-purple-500",
+          bgColor: "bg-blue-50",
+          borderColor: "border-blue-200",
+        },
+      ]);
+      setAddStatus("Desktop app attached and project added!");
+    }
+    setTimeout(() => {
+      setShowAddProject(false);
+      setAddStatus("");
+      setSelectedProject(null);
+      setUploadDesktopApp(null);
+    }, 1200);
+  }
+
   return (
     <div>
       {/* Header */}
       <div className="fixed w-full z-50 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Use the Header component */}
         <Header isRefreshing={isRefreshing} refreshData={refreshData} />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-24">
+      <div className="max-w-7xl mx-auto px-6 pt-32 py-24">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Active Projects */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
@@ -241,7 +327,7 @@ const DePINDashboard = () => {
               </span>
             </div>
           </div>
-
+          {/* Avg Performance */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
@@ -249,10 +335,12 @@ const DePINDashboard = () => {
                   Avg Performance
                 </p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {Math.round(
-                    projects.reduce((sum, p) => sum + p.performance, 0) /
-                      projects.length
-                  )}
+                  {projects.length > 0
+                    ? Math.round(
+                        projects.reduce((sum, p) => sum + p.performance, 0) /
+                          projects.length
+                      )
+                    : 0}
                   %
                 </p>
               </div>
@@ -267,7 +355,7 @@ const DePINDashboard = () => {
               </span>
             </div>
           </div>
-
+          {/* Network Status */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
@@ -450,7 +538,6 @@ const DePINDashboard = () => {
                             {project.description}
                           </p>
 
-                          {/* Method Badge */}
                           <div className="flex items-center space-x-2 mb-3">
                             <span
                               className={`text-xs px-2 py-1 rounded-full font-medium ${
@@ -476,7 +563,6 @@ const DePINDashboard = () => {
                             </span>
                           </div>
 
-                          {/* Setup Instructions */}
                           <div className="bg-gray-50 rounded-lg p-3 mb-3">
                             <p className="text-xs text-gray-600 font-medium mb-1">
                               Setup Instructions:
@@ -486,7 +572,6 @@ const DePINDashboard = () => {
                             </p>
                           </div>
 
-                          {/* Control Method Explanation */}
                           <div className="mb-4">
                             {project.method === "chrome_extension" && (
                               <div className="flex items-start space-x-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg">
@@ -534,10 +619,39 @@ const DePINDashboard = () => {
                               </div>
                             )}
                           </div>
-
-                          <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all">
-                            Add Project
-                          </button>
+                          {/* Enhanced: Add/activate project logic */}
+                          {project.method === "chrome_extension" && (
+                            <button
+                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                              onClick={() => handleProjectAdd(project)}
+                            >
+                              Connect Extension
+                            </button>
+                          )}
+                          {project.method === "desktop_app" && (
+                            <div>
+                              <input
+                                type="file"
+                                className="mb-2"
+                                onChange={(e) =>
+                                  setUploadDesktopApp(e.target.files[0])
+                                }
+                              />
+                              <button
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                                onClick={() => handleProjectAdd(project)}
+                              >
+                                Attach Desktop App
+                              </button>
+                            </div>
+                          )}
+                          {selectedProject &&
+                            selectedProject.name === project.name &&
+                            addStatus && (
+                              <div className="mt-2 text-xs text-blue-700">
+                                {addStatus}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
